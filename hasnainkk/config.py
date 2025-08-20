@@ -6,7 +6,7 @@ class Config(object):
     sudo_users = [5196578270, 6138142369, 6346273488, 6143079414, 6495101094]
     #", "6138142369", "6346273488", "6143079414", "6495101094",
     GROUP_ID  =  "-1002076327473"
-    TOKEN = "6805432104:AAEAzB7wQvOJ09d3t9hl0XARCF6ZBI8LakU"
+    TOKEN = "8013665655:AAFbn4ZUUXAUqXV1HBvGdrcDFiYaDY9Y4do"
     mongo_url = "mongodb+srv://hasnainkk:hasnainkk@cluster0.mmvls.mongodb.net/?retryWrites=true&w=majority"
     PHOTO_URL = ["https://telegra.ph/file/62b70323bbbde7cf8ed4e.jpg", "https://telegra.ph/file/62b70323bbbde7cf8ed4e.jpg", "https://telegra.ph/file/192832f0e136f50193489.jpg", "https://telegra.ph/file/6f9e5e2112b633164a101.jpg", "https://telegra.ph/file/d84750e4a34801fc82114.jpg", "https://telegra.ph/file/87df160e3f499a9a18c8d.jpg"]
     SUPPORT_CHAT = "the_league_of_snatchers"
