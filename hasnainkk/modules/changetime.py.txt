@@ -1,0 +1,105 @@
+from hasnainkk import ZYRO as app
+from hasnainkk.config import Config
+import random
+import asyncio
+import time
+from pyrogram.types import ChatMemberStatus
+from pyrogram import filters
+from pyrogram.enums import ParseMode
+
+RARITY_WEIGHTS = {
+    "⚪️ Common": 40,          # Most frequent
+    "🟢 Medium": 20,          # Less frequent than Common
+    "🟣 Rare": 12,            # Rare but obtainable
+    "🟡 Legendary": 8,        # Very rare
+    "💮 Special Edition": 6,  # Extremely rare
+    "🔮 Limited Edition": 4,  # Ultra-rare
+    "🎐 Celestial": 2.9,        # Legendary and mythical
+    "💖 Valentine": 2,        # Special Valentine's rarity
+    "🎃 Halloween": 2,        # Halloween themed rarity
+    "❄️ Winter": 1.5,         # Winter themed rarity
+    "🌧 Rainy": 1,            # Rainy season rarity
+    "💸 Expensive": 0.5,      # Expensive rarity
+    "👑 V. I. P.": 0.5,        # VIP rarity
+    "💌 AMV": 0.1,
+}
+# Default deletion time (5 minutes)
+DELETE_TIME = 300  # in seconds
+
+ADMINS = [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]
+SUDO_USERS = Config.sudo_users  # List of Sudo Users
+OWNER_ID = Config.OWNER_ID  # Bot Owner ID
+
+async def delete_message(chat_id, message_id, client):
+    await asyncio.sleep(DELETE_TIME)
+    try:
+        await client.delete_messages(chat_id, message_id)
+    except Exception as e:
+        print(f"Error deleting message: {e}")
+
+async def is_admin(chat_id, user_id, client):
+    member = await client.get_chat_member(chat_id, user_id)
+    return member.status in ADMINS or user_id in SUDO_USERS or user_id == OWNER_ID
+
+@app.on_message(filters.command("changetime") & filters.group)
+async def change_time(client, message):
+    global DELETE_TIME
+    user_id = message.from_user.id
+    chat_id = message.chat.id
+
+    if not await is_admin(chat_id, user_id, client):
+        return await message.reply_text("❌ Only admins and the owner can use this command!")
+
+    args = message.command[1:]
+    if len(args) != 1:
+        return await message.reply_text("⚠ Usage: `/changetime <time>`\nExample: `/changetime 10m`", parse_mode=ParseMode.MARKDOWN)
+
+    time_str = args[0]
+    unit = time_str[-1]
+    value = time_str[:-1]
+
+    if not value.isdigit():
+        return await message.reply_text("⚠ Invalid format! Example: `/changetime 5m` or `/changetime 1h`")
+
+    value = int(value)
+    if unit == 'm' and value >= 3:
+        DELETE_TIME = value * 60
+    elif unit == 'h' and value >= 1:
+        DELETE_TIME = value * 3600
+    else:
+        return await message.reply_text("❌ Minimum time is `3m`, and you can set any time above that!")
+
+    await message.reply_text(f"✅ Deletion time is now set to `{value}{unit}`!")
+
+@app.on_message(filters.command("settime") & filters.group)
+async def set_time(client, message):
+    global DELETE_TIME
+    user_id = message.from_user.id
+
+    if user_id not in SUDO_USERS and user_id != OWNER_ID:
+        return await message.reply_text("❌ Only SUDO users and the owner can use this command!")
+
+    args = message.command[1:]
+    if len(args) != 1:
+        return await message.reply_text("⚠ Usage: `/settime <time>`\nExample: `/settime 10s`", parse_mode=ParseMode.MARKDOWN)
+
+    time_str = args[0]
+    unit = time_str[-1]
+    value = time_str[:-1]
+
+    if not value.isdigit():
+        return await message.reply_text("⚠ Invalid format! Example: `/settime 5m` or `/settime 2h`")
+
+    value = int(value)
+    if unit == 's':
+        DELETE_TIME = value
+    elif unit == 'm':
+        DELETE_TIME = value * 60
+    elif unit == 'h':
+        DELETE_TIME = value * 3600
+    elif unit == 'd':
+        DELETE_TIME = value * 86400
+    else:
+        return await message.reply_text("⚠ Invalid format! Use `s`, `m`, `h`, `d`")
+
+    await message.reply_text(f"✅ Deletion time is now set to `{value}{unit}`!")
